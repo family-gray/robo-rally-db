@@ -31,6 +31,7 @@ function dragOver(e) {
 }
 
 function dragEnd() {
+  console.log("dragEnd");
   selected = null
 }
 
@@ -71,6 +72,10 @@ const appendNewAction = action => {
   let dragstart = document.createAttribute("ondragstart");       
   dragstart.value = "dragStart(event)";           
   newListItem.setAttributeNode(dragstart);   
+/*
+
+  ondragend="dragEnd()" ondragover="dragOver(event)" ondragstart="dragStart(event)"
+*/  
 };
 
 // listen for the form to be submitted and add a new action when it is
