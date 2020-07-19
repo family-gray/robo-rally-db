@@ -3,47 +3,41 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="A cool thing made with Glitch">
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="A cool thing made with Glitch" />
 
     <title>Welcome to Glitch!</title>
 
-    <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
+    <link
+      id="favicon"
+      rel="icon"
+      href="https://glitch.com/edit/favicon-app.ico"
+      type="image/x-icon"
+    />
     <!-- import the webpage's stylesheet -->
-    <link rel="stylesheet" href="/style.css">
-    
+    <link rel="stylesheet" href="/style.css" />
+
     <!-- import the webpage's client-side javascript file -->
     <script src="/client.js" defer></script>
   </head>
   <body>
-    <header>
-      <h1>
-        Add Actions
-      </h1>
-    </header>
+    <header></header>
 
     <main>
-            
-      <form>
-        <input name="action" aria-label="another action" type="text" maxlength="12" placeholder="Move 1">
-        <input name="priority" aria-label="card priority" type="number" min="1" max="999">
-        <button type="submit" id="submit-action">Submit Action</button>
-      </form>
-      
       <section class="actions">
-        <ul id="actions"></ul>
         <button id="clear-actions">
           Clear Actions
         </button>
+        <button id="reload-actions">
+          Reload Actions
+        </button>
+        <ul id="actions"></ul>        
       </section>
-      
     </main>
 
-    <footer>
-      Made with <a href="https://glitch.com">Glitch</a>!
-    </footer>
+    <footer>Made with <a href="https://glitch.com">Glitch</a>!</footer>
 
     <!-- include the Glitch button to show what the webpage is about and
           to make it easier for folks to view source and remix -->
