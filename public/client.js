@@ -74,6 +74,8 @@ const appendNewAction = action => {
   newListItem.setAttributeNode(dragstart);
 };
 
+
+/*
 clearButton.addEventListener("click", event => {
   fetch("/clearActions", {})
     .then(res => res.json())
@@ -91,3 +93,5 @@ reloadButton.addEventListener("click", async event => {
     });
   fillActions();
 });
+
+*/
