@@ -21,7 +21,6 @@ const exists = fs.existsSync(dbFile);
 const sqlite3 = require("sqlite3").verbose();
 const db = new sqlite3.Database(dbFile);
 
-
 // http://expressjs.com/en/starter/basic-routing.html
 app.get("/", (request, response) => {
   response.sendFile(`${__dirname}/views/index.html`);
@@ -40,7 +39,6 @@ app.get("/getUniqueCardText", (request, response) => {
     response.send(JSON.stringify(rows));
   });
 });
-
 
 // endpoint to clear dreams from the database
 app.get("/clearActions", (request, response) => {
@@ -68,35 +66,36 @@ app.get("/clearActions", (request, response) => {
 });
 
 app.get("/createActions", (request, response) => {
-  db.serialize(() => {
-    db.run(
-      "CREATE TABLE IF NOT EXISTS Actions" +
-      "(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," + 
-      "cardText TEXT NOT NULL," +
-      "priority INTEGER NOT NULL," +
-      "action CHAR(4) NOT NULL REFERENCES ActionTypes(action)," + 
-      "unit INTEGER NOT NULL)"
-    ).run(
-      "CREATE TABLE IF NOT EXISTS ActionTypes" +
-      "(action CHAR(4) PRIMARY KEY NOT NULL," + 
-      "seq INTEGER UNIQUE)"
-    ).run(
-      "INSERT INTO ActionTypes(action,seq) VALUES ('TURN',1)"
-    ).run(
-      "INSERT INTO ActionTypes(action,seq) VALUES ('STEP',2)"  
-    )
-  });
-  response.send({ message: "success" });
-  console.log("New table Actions created!");
-});
+  if (!process.env.DISALLOW_WRITE) {
+    db.serialize(() => {
+      db.run(
+        "CREATE TABLE IF NOT EXISTS Actions" +
+          "(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
+          "cardText TEXT NOT NULL," +
+          "priority INTEGER NOT NULL," +
+          "action CHAR(4) NOT NULL REFERENCES ActionTypes(action)," +
+          "unit INTEGER NOT NULL)"
+      )
+        .run(
+          "CREATE TABLE IF NOT EXISTS ActionTypes" +
+            "(action CHAR(4) PRIMARY KEY NOT NULL," +
+            "seq INTEGER UNIQUE)"
+        )
+        .run("INSERT INTO ActionTypes(action,seq) VALUES ('TURN',1)")
+        .run("INSERT INTO ActionTypes(action,seq) VALUES ('STEP',2)");
+    });
+    response.send({ message: "success" });
+    console.log("New table Actions created!");
+  }});
 
 app.get("/dropActions", (request, response) => {
+if (!process.env.DISALLOW_WRITE) {  
   db.serialize(() => {
     db.run("DROP TABLE Actions").run("DROP TABLE ActionTypes");
   });
   response.send({ message: "success" });
   console.log("table Actions deleted!");
-});
+}});
 
 function genActionsArray(
   cardText,

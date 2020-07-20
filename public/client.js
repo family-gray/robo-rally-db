@@ -32,6 +32,7 @@ function dragOver(e) {
 
 function dragEnd() {
   console.log("dragEnd");
+  selected.style.color = "black";
   selected = null;
 }
 
@@ -39,6 +40,7 @@ function dragStart(e) {
   e.dataTransfer.effectAllowed = "move";
   e.dataTransfer.setData("text/plain", null);
   selected = e.target;
+  selected.style.color = "red";
 }
 
 function isBefore(el1, el2) {
