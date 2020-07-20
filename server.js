@@ -21,23 +21,6 @@ const exists = fs.existsSync(dbFile);
 const sqlite3 = require("sqlite3").verbose();
 const db = new sqlite3.Database(dbFile);
 
-// if ./.data/sqlite.db does not exist, create it, otherwise print records to console
-db.serialize(() => {
-  if (!exists) {
-    db.run(
-      "CREATE TABLE IF NOT EXISTS Actions (id INTEGER PRIMARY KEY AUTOINCREMENT, cardText TEXT, priority INTEGER, action TEXT, unit INTEGER)"
-    );
-    console.log("New table Actions created!");
-  } else {
-    console.log('Database "Actions" ready to go!');
-
-    db.each("SELECT * from Actions", (err, row) => {
-      if (row) {
-        console.log(`record: ${row.action}, ${row.priority}`);
-      }
-    });
-  }
-});
 
 // http://expressjs.com/en/starter/basic-routing.html
 app.get("/", (request, response) => {
@@ -50,6 +33,14 @@ app.get("/getActions", (request, response) => {
     response.send(JSON.stringify(rows));
   });
 });
+
+// endpoint to get all the actions in the database
+app.get("/getUniqueCardText", (request, response) => {
+  db.all("SELECT DISTINCT cardText from Actions", (err, rows) => {
+    response.send(JSON.stringify(rows));
+  });
+});
+
 
 // endpoint to clear dreams from the database
 app.get("/clearActions", (request, response) => {
@@ -79,8 +70,21 @@ app.get("/clearActions", (request, response) => {
 app.get("/createActions", (request, response) => {
   db.serialize(() => {
     db.run(
-      "CREATE TABLE IF NOT EXISTS Actions (id INTEGER PRIMARY KEY AUTOINCREMENT, cardText TEXT, priority INTEGER, action TEXT, unit INTEGER)"
-    );
+      "CREATE TABLE IF NOT EXISTS Actions" +
+      "(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," + 
+      "cardText TEXT NOT NULL," +
+      "priority INTEGER NOT NULL," +
+      "action CHAR(4) NOT NULL REFERENCES ActionTypes(action)," + 
+      "unit INTEGER NOT NULL)"
+    ).run(
+      "CREATE TABLE IF NOT EXISTS ActionTypes" +
+      "(action CHAR(4) PRIMARY KEY NOT NULL," + 
+      "seq INTEGER UNIQUE)"
+    ).run(
+      "INSERT INTO ActionTypes(action,seq) VALUES ('TURN',1)"
+    ).run(
+      "INSERT INTO ActionTypes(action,seq) VALUES ('STEP',2)"  
+    )
   });
   response.send({ message: "success" });
   console.log("New table Actions created!");
@@ -88,7 +92,7 @@ app.get("/createActions", (request, response) => {
 
 app.get("/dropActions", (request, response) => {
   db.serialize(() => {
-    db.run("DROP TABLE Actions");
+    db.run("DROP TABLE Actions").run("DROP TABLE ActionTypes");
   });
   response.send({ message: "success" });
   console.log("table Actions deleted!");
@@ -117,13 +121,13 @@ function genActionsArray(
 app.get("/loadDefaultActions", (request, response) => {
   // DISALLOW_WRITE is an ENV variable that gets reset for new projects so you can write to the database
   if (!process.env.DISALLOW_WRITE) {
-    let actions = genActionsArray("U-Turn", 10, 60, 10, "Rotate", 180)
-      .concat(genActionsArray("Rotate Right", 80, 420, 20, "Rotate", 90))
-      .concat(genActionsArray("Rotate Left", 70, 410, 20, "Rotate", -90))
-      .concat(genActionsArray("Back Up", 430, 480, 10, "Step", -1))
-      .concat(genActionsArray("Move 1", 430, 480, 10, "Step", 1))
-      .concat(genActionsArray("Move 2", 490, 780, 10, "Step", 2))
-      .concat(genActionsArray("Move 3", 790, 840, 10, "Step", 3));
+    let actions = genActionsArray("U-Turn", 10, 60, 10, "TURN", 180)
+      .concat(genActionsArray("Rotate Right", 80, 420, 20, "TURN", 90))
+      .concat(genActionsArray("Rotate Left", 70, 410, 20, "TURN", -90))
+      .concat(genActionsArray("Back Up", 430, 480, 10, "STEP", -1))
+      .concat(genActionsArray("Move 1", 430, 480, 10, "STEP", 1))
+      .concat(genActionsArray("Move 2", 490, 780, 10, "STEP", 2))
+      .concat(genActionsArray("Move 3", 790, 840, 10, "STEP", 3));
     console.log(JSON.stringify(actions));
 
     // create the statement for the insertion of just ONE record
